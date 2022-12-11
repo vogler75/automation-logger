@@ -1,0 +1,24 @@
+Plc4x:
+  Drivers:
+    - Id: "test"
+      Enabled: true
+      Url: "modbus-tcp://localhost:502"
+      Polling:
+        Time: 1000
+        Timeout: 900
+        OldNew: true
+      WriteTimeout: 1000
+      ReadTimeout: 1000
+      LogLevel: INFO
+
+Database:
+  Logger:
+    - Id: iotdb
+      Type: IoTDB
+      Host: localhost
+      Port: 6667
+      Database: root.scada
+      Logging:
+        - Topic: plc/test/node/holding-register:1:INT
+        - Topic: plc/test/node/holding-register:2:INT
+        - Topic: plc/test/node/holding-register:3:INT
