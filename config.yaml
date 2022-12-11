@@ -15,7 +15,7 @@ Database:
   Logger:
     - Id: iotdb
       Type: IoTDB
-      Host: localhost
+      Host: nuc1
       Port: 6667
       Database: root.scada
       Logging:

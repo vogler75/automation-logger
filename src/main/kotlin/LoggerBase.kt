@@ -94,7 +94,6 @@ abstract class LoggerBase(config: JsonObject) : AbstractVerticle() {
 
     override fun start(startPromise: Promise<Void>) {
         startPromise.future().onComplete {
-            vertx.eventBus().consumer("${Common.BUS_ROOT_URI_LOG}/$id/QueryHistory", ::queryHandler)
             vertx.setPeriodic(1000, ::metricCalculator)
             writeValueThread.start()
             subscribeTopics()
@@ -110,7 +109,7 @@ abstract class LoggerBase(config: JsonObject) : AbstractVerticle() {
         }
     }
 
-    private fun subscribeTopics() { // TODO: Same in Influx
+    private fun subscribeTopics() {
         val handler = ServiceHandler(vertx, logger)
         services.forEach { it ->
             handler.observeService(it.first.name, it.second) { service ->
@@ -216,26 +215,5 @@ abstract class LoggerBase(config: JsonObject) : AbstractVerticle() {
         t1 = t2
         valueCounterInput = 0
         valueCounterOutput = 0
-    }
-
-    abstract fun queryExecutor(
-        system: String,
-        nodeId: String,
-        fromTimeMS: Long,
-        toTimeMS: Long,
-        result: (Boolean, List<List<Any>>?) -> Unit // [[sourcetime, servertime, value, statuscode, system]]
-    )
-
-    private fun queryHandler(message: Message<JsonObject>) {
-        val request = message.body()
-        val system = request.getString("System")
-        val nodeId = request.getString("NodeId")
-        val t1 = request.getLong("T1") // ms
-        val t2 = request.getLong("T2") // ms
-        queryExecutor(system, nodeId, t1, t2) { ok, result ->
-            val response = JsonObject().put("Ok", ok)
-            if (ok) response.put("Result", result)
-            message.reply(response)
-        }
     }
 }
